@@ -20,26 +20,19 @@ app.use(jwt({ secret: publicKey, algorithms: ["RS256"] }));
 
 app.use(guard.check("tenant:read"));
 
-app.get("/:tenantId?", (req, res) => {
-  let { tenantId } = req.params;
-
-  if (!req.user.permissions.includes("tenant:read:all")) {
-    tenantId = req.user.tenant;
-  } else {
-    tenantId = tenantId ? tenantId : req.user.tenant;
-  }
-
-  Tenant.findById(tenantId, (err, tenant) => {
+app.get("/", (req, res) => {
+  Tenant.find({}, (err, tenant) => {
     if (err) return res.status(500).send("user.find err");
-    if (!tenant) return res.status(404).send("tenant not found");
 
     res.send(tenant);
   });
 });
 
-app.get("/all", (req, res) => {
-  Tenant.find({}, (err, tenant) => {
+app.get("/:tenantId", (req, res) => {
+  let { tenantId } = req.params;
+  Tenant.findById(tenantId, (err, tenant) => {
     if (err) return res.status(500).send("user.find err");
+    if (!tenant) return res.status(404).send("tenant not found");
 
     res.send(tenant);
   });

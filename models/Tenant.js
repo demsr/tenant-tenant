@@ -3,11 +3,15 @@ const moment = require("moment");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
-const redis = require("../db/Redis");
+const Redis = require("ioredis");
+const publisher = new Redis();
 
 const Schema = new mongoose.Schema({
   name: String,
-  apps: [{ type: mongoose.Types.ObjectId, ref: "RefApp" }],
+});
+
+Schema.post("save", (model) => {
+  publisher.publish("tenant", JSON.stringify(model));
 });
 
 module.exports = mongoose.model("Tenant", Schema);
